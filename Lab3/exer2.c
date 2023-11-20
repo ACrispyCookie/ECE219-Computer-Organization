@@ -1,7 +1,11 @@
 #include <stdio.h>
 
+int f(int n, int m);
+
 int main(int argc, char *argv[]) {
     int res = f(3, 5);
+
+    printf("%d\n", res);
 }
 
 int f(int n, int m) {

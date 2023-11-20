@@ -18,8 +18,9 @@ li $a0, 3
 li $a1, 5
 
 jal f
+move $t0, $v0
 
-print_int($v0)
+print_int($t0)
 exit()
 
 f: #$a0 = n, $a1 = m
@@ -34,21 +35,22 @@ move $v0, $a0
 jr $ra
 
 m_not_zero:
-addi $sp, $sp, -12
+addi $sp, $sp, -16
 sw $ra, 0($sp)
 sw $a0, 4($sp)
 sw $a1, 8($sp)
 
 addi $a0, $a0, -1
 jal f
-move $t0, $v0
+sw $v0, 12($sp)
 
-lw $a0, 8($sp)
-lw $a1, 4($sp)
+lw $a0, 4($sp)
+lw $a1, 8($sp)
 addi $a1, $a1, -1
 jal f
 
-add $v0, $0, $t0
+lw $t0, 12($sp)
+add $v0, $v0, $t0
 lw $ra, 0($sp)
-addi $sp, $sp, 12
+addi $sp, $sp, 16
 jr $ra
