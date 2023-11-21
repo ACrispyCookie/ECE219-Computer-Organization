@@ -20,37 +20,36 @@ main:
 	jal f
 	move $t0, $v0
 
-	print_int($t0)
+	print_int($t8)
 	exit()
 
 f: #$a0 = n, $a1 = m
 
 	bnez $a0, n_not_zero
 	move $v0, $a1
+	add $v1, $v1, $v0
 	jr $ra
 
 n_not_zero:
 	bnez $a1, m_not_zero
 	move $v0, $a0
+	add $v1, $v1, $v0
 	jr $ra
 
 m_not_zero:
-	addi $sp, $sp, -16
+	addi $sp, $sp, -12
 	sw $ra, 0($sp)
 	sw $a0, 4($sp)
 	sw $a1, 8($sp)
 
 	addi $a0, $a0, -1
 	jal f
-	sw $v0, 12($sp)
 
 	lw $a0, 4($sp)
 	lw $a1, 8($sp)
 	addi $a1, $a1, -1
 	jal f
 
-	lw $t0, 12($sp)
-	add $v0, $v0, $t0
 	lw $ra, 0($sp)
-	addi $sp, $sp, 16
+	addi $sp, $sp, 12
 	jr $ra
