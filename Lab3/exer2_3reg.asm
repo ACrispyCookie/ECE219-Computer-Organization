@@ -14,13 +14,12 @@ syscall
 .end_macro
 
 main:
-	li $a0, 3
-	li $a1, 5
+	li $a0, 2
+	li $a1, 2
 
 	jal f
-	move $t0, $v0
 
-	print_int($t8)
+	print_int($v1)
 	exit()
 
 f: #$a0 = n, $a1 = m
