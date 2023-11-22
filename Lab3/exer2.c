@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     printf("%d\n", res);
     printf("Reccursions:%d\n", bytes*BPR);
     printf("Called %d times\n", called);
-    printf("Max stack size was: %d \n", max);
+    printf("Max stack size was: %d \n", max*BPR);
     
     return 0;
 }
