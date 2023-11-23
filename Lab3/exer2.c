@@ -25,11 +25,13 @@ int f(int n, int m) {
 	// printf("Called cur: %d\n", cur_stack_size);
 	
 	called++;
-    if(m == 0)
+    if(m == 0) {
         return n;
+    }
 
-    if(n == 0)
+    if(n == 0) {
         return m;
+    }
     
 	bytes++;
 	cur_stack_size++;
