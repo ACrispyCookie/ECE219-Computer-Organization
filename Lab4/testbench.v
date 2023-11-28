@@ -5,7 +5,7 @@
 // and monitor the outputs. This is what all testbenches do
 
 `timescale 1ns/1ps
-`define clock_period 2
+`define clock_period 10
 
 module cpu_tb;
 reg       clock, reset;    // Clock and reset signals

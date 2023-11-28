@@ -49,8 +49,4 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
     rdA = data[raA];
     rdB = data[raB];
   end
-
-  initial begin
-    $monitor("0=%b\n1=%b\n2=%b\n3=%b\n4=%b\ntime=%t\n", data[0], data[1], data[2], data[3], data[4], $time);
-  end
 endmodule
