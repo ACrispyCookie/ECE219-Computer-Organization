@@ -26,6 +26,9 @@ initial begin  // Ta statements apo ayto to begin mexri to "end" einai seiriaka
   // Initialize the module 
    $dumpfile("dumpfile.vcd");
    $dumpvars(0, cpu_tb);
+   for (i = 0; i < 32; i = i + 1)
+      $monitor("Reg[%d]=%d", i, regs.data[i]);
+
    clock = 1'b0;       
    reset = 1'b0;  // Apply reset for a few cycles
    #(4.25*`clock_period) reset = 1'b1;

@@ -43,6 +43,9 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
     if (reset) begin
       if (wen) data[wa] = wd;
     end
+    else begin
+      for (i = 0; i < 32; i = i + 1)
+        data[i] = i;
   end
 
   always @(data[raA], data[raB], raA, raB) begin
