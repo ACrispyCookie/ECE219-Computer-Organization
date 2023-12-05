@@ -1,5 +1,4 @@
-// This file contains library modules to be used in your design. 
-
+// This file contains library modules to be used in your design.
 `include "constants.h"
 `timescale 1ns/1ps
 
@@ -15,6 +14,7 @@
 module ALU (out, zero, inA, inB, op);
   parameter N = 32;
   output reg [N-1:0] out;
+
   output reg zero;
   input  [N-1:0] inA, inB;
   input    [3:0] op;
@@ -32,7 +32,6 @@ module ALU (out, zero, inA, inB, op);
     zero = (out == 0) ? 1 : 0;
   end
 endmodule
-
 
 // Memory (active 1024 words, from 10 address ).
 // Read : enable ren, address addr, data dout
@@ -61,9 +60,15 @@ module Memory (ren, wen, addr, din, dout);
     if ((wen == 1'b1) && (ren==1'b0))
         data[addr[9:0]] = din;
    end
-
 endmodule
 
+/*module InstructionMemory (addr, data);
+  input [31:0] addr;
+  output wire [31:0] data;
+  reg [31:0] mem[1023:0];
+
+  assign data = mem[addr[9:0]];
+endmodule*/
 
 // Register File. Input ports: address raA, data rdA
 //                            address raB, data rdB
@@ -78,11 +83,11 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
 
   always @(negedge clock, negedge reset) begin
     if (reset) begin
-      if (wen && wa != 0) data[wa] = wd;
+      if (wen && wa != 0) data[wa] <= wd;
     end
     else begin
       for (i = 0; i < 32; i = i + 1)
-        data[i] = 0;
+        data[i] <= 0;
     end
   end
 
@@ -90,26 +95,105 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
   assign rdB = data[raB];
 endmodule
 
-
-
 // Module to control the data path. 
-//                          Input: op, func of the inpstruction
+//                          Input: opcode of the instruction
 //                          Output: all the control signals needed 
-module ControlUnit(output reg RegDst, output reg ALUSrc, output reg MemtoReg, output reg RegWrite, 
-                  output reg MemRead, output reg MemWrite, output reg Branch, output reg ALUOp1, 
-                  output reg ALUOp0, output reg Jump, input [5:0] opcode, input [5:0] func);
+module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, ALUOp, Jump, opcode);
+  input [5:0] opcode;
+  output reg RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Jump;
+  output reg [1:0] ALUOp;
   
   always @* begin
     case (opcode)
-      6'h00: begin 
+      6'h00: begin // R-type
+        RegDst = 1'b1;
+        ALUSrc = 1'b0;
+        MemtoReg = 1'b0;
         RegWrite = 1'b1;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b0;
+        ALUOp = 2'b10;
+        Jump = 1'b0;
+      end
+      6'h23: begin // lw
+        RegDst = 1'b0;
+        ALUSrc = 1'b1;
+        MemtoReg = 1'b1;
+        RegWrite = 1'b1;
+        MemRead = 1'b1;
+        MemWrite = 1'b0;
+        Branch = 1'b0;
+        ALUOp = 2'b00;
+        Jump = 1'b0;
+      end
+      6'h2b: begin // sw
+        RegDst = 1'b0;
+        ALUSrc = 1'b1;
+        MemtoReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b1;
+        Branch = 1'b0;
+        ALUOp = 2'b00;
+        Jump = 1'b0;
+      end
+      6'h8: begin // addi
+        RegDst = 1'b0;
+        ALUSrc = 1'b1;
+        MemtoReg = 1'b0;
+        RegWrite = 1'b1;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b0;
+        ALUOp = 2'b00;
+        Jump = 1'b0;
+      end
+      6'h4: begin // beq
+        RegDst = 1'b0;
+        ALUSrc = 1'b0;
+        MemtoReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b1;
+        ALUOp = 2'b01;
+        Jump = 1'b0;
+      end
+      6'h5: begin // bne TODO FIX
+        RegDst = 1'b0;
+        ALUSrc = 1'b0;
+        MemtoReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b1;
+        ALUOp = 2'b01;
+        Jump = 1'b0;
+      end
+      6'h2: begin // jump
+        RegDst = 1'b0;
+        ALUSrc = 1'b0;
+        MemtoReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b0;
+        ALUOp = 2'b00;
+        Jump = 1'b1;
       end
     endcase
   end
-
 endmodule
 
-module ALUControl(output reg ALUControl, input [1:0] ALUOp, input [5:0] func);
+// Module to control the ALU. 
+//                          Input: ALUop, func
+//                          Output: ALUControl signal 
+module ALUControl(ALUControl, ALUOp, func);
+  input [1:0] ALUOp;
+  input [5:0] func;
+  output reg [3:0] ALUControl;
+
   always @* begin
     case (ALUOp)
       2'h0: ALUControl = 4'h2;
@@ -128,5 +212,3 @@ module ALUControl(output reg ALUControl, input [1:0] ALUOp, input [5:0] func);
     endcase
   end
 endmodule
-
-
