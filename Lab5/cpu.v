@@ -35,11 +35,11 @@ module CPU (clk, reset);
     ALU alu(ALUOut, Zero, rdA, ALUInB, ALUControl);
     Memory DMem(MemRead, MemWrite, ALUOut, rdB, memOut);
 
-    always @(posedge clk, posedge reset) begin
-        if (reset)
+    always @(posedge clk, negedge reset) begin
+        if (!reset)
             PC = 0;
         else
-            PC = PC + 4;
+            PC = PC + 1;
     end
 
     always @(negedge clk, negedge reset) begin
