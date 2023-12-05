@@ -12,7 +12,7 @@ integer   i;
 reg       clock, reset;    // Clock and reset signals
 
 // Instantiate CPU here with name cpu0
-CPU cpu0 ....
+//CPU cpu0 ....
 
 // Initialization and signal generation
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,12 +26,12 @@ CPU cpu0 ....
 initial 
     begin  
 
-      for (i = 0; i < 32; i = i+1)
-         cpu0.cpu_regs.data[i] = i;   // Note that R0 = 0 in MIPS 
+      //for (i = 0; i < 32; i = i+1)
+         //cpu0.cpu_regs.data[i] = i;   // Note that R0 = 0 in MIPS 
 
   // Initialize Instruction Memory. You have to develop "program.hex" as a text file 
   // which containsthe instruction opcodes as 32-bit hexadecimal values.
-  $readmemh("program.hex", cpu0.cpu_IMem.data);
+  //$readmemh("program.hex", cpu0.cpu_IMem.data);
 
   // Edw, to "program.hex" einai ena arxeio pou prepei na brisketai sto 
   // directory pou trexete th Verilog kai na einai ths morfhs:

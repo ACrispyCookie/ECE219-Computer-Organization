@@ -13,9 +13,24 @@
 //             slt  (op = 7)
 //             nor (op = 12)
 module ALU (out, zero, inA, inB, op);
+  parameter N = 32;
+  output reg [N-1:0] out;
+  output reg zero;
+  input  [N-1:0] inA, inB;
+  input    [3:0] op;
 
-// was completed in Lab4
+  always @* begin
+    case (op)
+      4'h0: out = inA & inB;
+      4'h1: out = inA | inB;
+      4'h2: out = inA + inB;
+      4'h6: out = inA - inB;
+      4'h7: out = (inA < inB) ? 1 : 0;
+      4'hc: out = ~(inA | inB);
+    endcase
 
+    zero = (out == 0) ? 1 : 0;
+  end
 endmodule
 
 
@@ -54,10 +69,25 @@ endmodule
 //                            address raB, data rdB
 //                Write port: address wa, data wd, enable wen.
 module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
+  input clock, reset, wen;
+  input [4:0] raA, raB, wa;
+  input [31:0] wd;
+  output wire [31:0] rdA, rdB;
+  output reg [31:0] data[31:0];
+  integer i;
 
-// was completed in Lab4
+  always @(negedge clock, negedge reset) begin
+    if (reset) begin
+      if (wen && wa != 0) data[wa] = wd;
+    end
+    else begin
+      for (i = 0; i < 32; i = i + 1)
+        data[i] = 0;
+    end
+  end
 
-
+  assign rdA = data[raA];
+  assign rdB = data[raB];
 endmodule
 
 
@@ -65,12 +95,38 @@ endmodule
 // Module to control the data path. 
 //                          Input: op, func of the inpstruction
 //                          Output: all the control signals needed 
-module ControlUnit(....... 
-           input [5:0] opcode, 
-           input [5:0] func);
-		   
-// Write the FSM code here
+module ControlUnit(output reg RegDst, output reg ALUSrc, output reg MemtoReg, output reg RegWrite, 
+                  output reg MemRead, output reg MemWrite, output reg Branch, output reg ALUOp1, 
+                  output reg ALUOp0, output reg Jump, input [5:0] opcode, input [5:0] func);
+  
+  always @* begin
+    case (opcode)
+      6'h00: begin 
+        RegWrite = 1'b1;
+      end
+    endcase
+  end
 
+endmodule
+
+module ALUControl(output reg ALUControl, input [1:0] ALUOp, input [5:0] func);
+  always @* begin
+    case (ALUOp)
+      2'h0: ALUControl = 4'h2;
+      2'h1: ALUControl = 4'h6;
+      2'h2: begin
+        case (func)
+          6'h20: ALUControl = 4'h2;
+          6'h22: ALUControl = 4'h6;
+          6'h24: ALUControl = 4'h0;
+          6'h25: ALUControl = 4'h1;
+          6'h2a: ALUControl = 4'h7;
+          default: ALUControl = 4'h0;
+        endcase
+      end
+      default: ALUControl = 4'h0;
+    endcase
+  end
 endmodule
 
 
