@@ -36,17 +36,14 @@ module CPU (clk, reset);
     Memory DMem(MemRead, MemWrite, ALUOut, rdB, memOut);
 
     always @(posedge clk, negedge reset) begin
-        if (!reset)
+        if(!reset)
             PC = 0;
-        else
-            PC = PC + 1;
-    end
-
-    always @(negedge clk, negedge reset) begin
-        if (Branch == 1'b1 && Zero == 1'b1)
+        else if (Branch == 1'b1 && Zero == 1'b1)
             PC = PC + (signExtendedInstr/* << 2*/);
         else if (Jump == 1'b1)
             PC = {PC[31:28], instr[25:0], 2'b00};
+        else
+            PC = PC + 1;
     end
 
     assign wd = (MemtoReg == 1'b1) ? memOut : ALUOut;
