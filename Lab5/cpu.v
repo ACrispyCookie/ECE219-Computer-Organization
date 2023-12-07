@@ -44,7 +44,7 @@ module CPU (clk, reset);
 
     always @(negedge clk, negedge reset) begin
         if (Branch == 1'b1 && Zero == 1'b1)
-            PC = PC + (signExtendedInstr << 2);
+            PC = PC + (signExtendedInstr/* << 2*/);
         else if (Jump == 1'b1)
             PC = {PC[31:28], instr[25:0], 2'b00};
     end
