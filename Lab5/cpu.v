@@ -10,7 +10,7 @@ module CPU (clk, reset);
     wire [31:0] instr;
 
     //Control signals
-    wire RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Jump;
+    wire RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Bne, Jump;
     
     //ALU wires
     wire [1:0] ALUOp;
@@ -38,8 +38,11 @@ module CPU (clk, reset);
     always @(posedge clk, negedge reset) begin
         if(!reset)
             PC = 0;
-        else if (Branch == 1'b1 && Zero == 1'b1)
-            PC = PC + (signExtendedInstr/* << 2*/);
+        else if (Branch == 1'b1)
+            if(Bne == 1'b1 && Zero == 1'b0 || Bne == 1'b0 && Zero == 1'b1)
+                PC = PC + (signExtendedInstr/* << 2*/);
+            else
+                PC = PC + 1;
         else if (Jump == 1'b1)
             PC = {PC[31:28], instr[25:0], 2'b00};
         else
