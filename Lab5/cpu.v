@@ -40,13 +40,15 @@ module CPU (clk, reset);
             PC = 0;
         else if (Branch == 1'b1)
             if(Bne == 1'b1 && Zero == 1'b0 || Bne == 1'b0 && Zero == 1'b1)
-                PC = PC + (signExtendedInstr/* << 2*/);
+                PC = PC + (signExtendedInstr << 2*);
             else
-                PC = PC + 1;
+                PC = PC + 4;
         else if (Jump == 1'b1)
             PC = {PC[31:28], instr[25:0], 2'b00};
         else
-            PC = PC + 1;
+            PC = PC + 4;
+		
+		PC >> 2;
     end
 
     assign wd = (MemtoReg == 1'b1) ? memOut : ALUOut;
