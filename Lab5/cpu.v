@@ -28,8 +28,8 @@ module CPU (clk, reset);
     //Memory wires
     wire [31:0] memOut;
 
-    Memory IMem (1'b1, 1'b0, PC, 0, instr);
-    ControlUnit CUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, ALUOp, Jump, instr[31:26]);
+    Memory IMem (1'b1, 1'b0, {2'b00, PC[31:2]}, 0, instr);
+    ControlUnit CUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Bne, ALUOp, Jump, instr[31:26]);
     ALUControl AControl(ALUControl, ALUOp, instr[5:0]);
     RegFile cpu_regs(clk, reset, instr[25:21], instr[20:16], wa, RegWrite, wd, rdA, rdB);
     ALU alu(ALUOut, Zero, rdA, ALUInB, ALUControl);
@@ -38,17 +38,13 @@ module CPU (clk, reset);
     always @(posedge clk, negedge reset) begin
         if(!reset)
             PC = 0;
-        else if (Branch == 1'b1)
-            if(Bne == 1'b1 && Zero == 1'b0 || Bne == 1'b0 && Zero == 1'b1)
-                PC = PC + (signExtendedInstr << 2*);
-            else
-                PC = PC + 4;
+        else if (Branch == 1'b1 && (Bne == 1'b1 && Zero == 1'b0 || Bne == 1'b0 && Zero == 1'b1))
+            PC = PC + (signExtendedInstr << 2);
         else if (Jump == 1'b1)
             PC = {PC[31:28], instr[25:0], 2'b00};
         else
             PC = PC + 4;
 		
-		PC >> 2;
     end
 
     assign wd = (MemtoReg == 1'b1) ? memOut : ALUOut;

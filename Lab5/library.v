@@ -98,9 +98,9 @@ endmodule
 // Module to control the data path. 
 //                          Input: opcode of the instruction
 //                          Output: all the control signals needed 
-module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, ALUOp, Jump, opcode);
+module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Bne, ALUOp, Jump, opcode);
   input [5:0] opcode;
-  output reg RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Jump;
+  output reg RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch, Bne, Jump;
   output reg [1:0] ALUOp;
   
   always @* begin
