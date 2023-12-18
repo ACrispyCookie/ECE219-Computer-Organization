@@ -2,6 +2,6 @@ CC = iverilog
 FLAGS = -Wall -Winfloop
 
 all:
-	$(CC) $(FLAGS) -o verilog.out library.v testbench.v
-	vvp verilog.out
-	gtkwave dumpfile.vcd
+	$(CC) $(FLAGS) -o ./src/verilog.out ./src/library.v ./src/testbench.v
+	vvp ./out/verilog.out
+	gtkwave ./out/dumpfile.vcd

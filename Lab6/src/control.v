@@ -1,4 +1,4 @@
-`include "constants.h"
+`include "./src/constants.h"
 
 /************** Main control in ID pipe stage  *************/
 module control_main(output reg RegDst,
@@ -16,35 +16,48 @@ module control_main(output reg RegDst,
      case (opcode)
       `R_FORMAT: 
       /* TO FILL IN: The control signal values in each and every case */
-          begin 
+          begin   
             RegDst = 1'b1;
             MemRead = 1'b0;
+            ALUSrc = 1'b0;
             MemWrite = 1'b0;
-            MemToReg = 1'b0;
-            // ALUSrc = 
-            // RegWrite = 
-            // Branch =        
-            // ALUcntrl  =             
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            Branch = 1'b0;    
+            ALUcntrl = 2'b10;   
           end
        `LW :   
-           begin 
+           begin
             RegDst = 1'b0;
             MemRead = 1'b1;
             MemWrite = 1'b0;
-            MemToReg = 1'b1;
-            // .............
+            ALUSrc = 1'b1;
+            MemtoReg = 1'b1;
+            RegWrite = 1'b1;
+            Branch = 1'b0;
+            ALUcntrl = 2'b00;
            end
         `SW :   
            begin 
-            // .............
+            RegDst = 1'b0;
+            ALUSrc = 1'b1;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b0;
+            MemRead = 1'b0;
+            MemWrite = 1'b1;
+            Branch = 1'b0;
+            ALUcntrl = 2'b00;
            end
        `BEQ:  
            begin 
-            // .............
-           end
-       default:
-           begin
-            // .............
+            RegDst = 1'b0;
+            MemRead = 1'b0;
+            MemWrite = 1'b0;
+            ALUSrc = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b0;
+            Branch = 1'b1;
+            ALUcntrl = 2'b01;
            end
       endcase
     end // always
@@ -52,13 +65,18 @@ endmodule
 
 
 /**************** Module for Bypass Detection in EX pipe stage goes here  *********/
-// TO FILL IN: Module details 
+// TO FILL IN: Module details
+module EX_bypass_detector(output reg [1:0] ForwardA,
+                          output reg [1:0] ForwardB
+                          input [4:0] Rs, 
+                          input [4:0] Rt,) 
 endmodule          
                        
 
 /**************** Module for Stall Detection in ID pipe stage goes here  *********/
 // TO FILL IN: Module details 
-
+module ID_stall_detector()
+endmodule
                        
 /************** control for ALU control in EX pipe stage  *************/
 module control_alu(output reg [3:0] ALUOp,                  

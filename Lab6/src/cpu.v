@@ -59,6 +59,7 @@ module cpu(input clock, input reset);
   end
   
 // TO FILL IN: Instantiate the Instruction Memory here 
+ Memory IMem (1'b1, 1'b0, {2'b00, PC[31:2]}, 0, instr);
   
   
   
@@ -182,7 +183,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
 /***************** Memory Unit (MEM)  ****************/  
 
 // Data memory 1KB
-// Instantiate the Data Memory here 
+// Instantiate the Data Memory here
 
 
 

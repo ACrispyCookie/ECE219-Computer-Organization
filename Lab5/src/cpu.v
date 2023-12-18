@@ -1,6 +1,6 @@
 // This file contains library modules to be used in your design. 
 
-`include "constants.h"
+`include "./src/constants.h"
 `timescale 1ns/1ps
 
 module CPU (clk, reset);

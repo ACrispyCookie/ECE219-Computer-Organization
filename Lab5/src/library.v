@@ -1,5 +1,5 @@
 // This file contains library modules to be used in your design.
-`include "constants.h"
+`include "./src/constants.h"
 `timescale 1ns/1ps
 
 // Small ALU. 
@@ -125,8 +125,8 @@ module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch
         MemRead = 1'b1;
         MemWrite = 1'b0;
         Branch = 1'b0;
-        Bne = 1'b0;
         ALUOp = 2'b00;
+        Bne = 1'b0;
         Jump = 1'b0;
       end
       6'h2b: begin // sw
@@ -137,8 +137,8 @@ module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch
         MemRead = 1'b0;
         MemWrite = 1'b1;
         Branch = 1'b0;
-        Bne = 1'b0;
         ALUOp = 2'b00;
+        Bne = 1'b0;
         Jump = 1'b0;
       end
       6'h8: begin // addi
@@ -161,8 +161,8 @@ module ControlUnit(RegDst, ALUSrc, MemtoReg, RegWrite, MemRead, MemWrite, Branch
         MemRead = 1'b0;
         MemWrite = 1'b0;
         Branch = 1'b1;
-        Bne = 1'b0;
         ALUOp = 2'b01;
+        Bne = 1'b0;
         Jump = 1'b0;
       end
       6'h5: begin // bne
