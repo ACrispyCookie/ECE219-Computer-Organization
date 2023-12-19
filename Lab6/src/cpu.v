@@ -29,6 +29,8 @@ module cpu(input clock, input reset);
  wire [1:0] ALUcntrl;
  wire [15:0] imm;
 
+ wire		IFID_Write;
+
  
  
 
@@ -116,20 +118,15 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
   end
 
 // Main Control Unit 
-control_main control_main (RegDst,
-                  Branch,
-                  MemRead,
-                  MemWrite,
-                  MemToReg,
-                  ALUSrc,
-                  RegWrite,
-                  ALUcntrl,
-                  opcode);
+control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
                   
 // TO FILL IN: Instantiation of Control Unit that generates stalls
+ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_instr_rt, IFID_Write, PC_Write, MUX_nop);
 
 
-
+// module ID_stall_detector(input [4:0] Rs, input [4:0] Rt, input IDEX_MemRead, input [4:0] IDEX_RegRt, output reg IFID_Write, output reg PC_Write, output reg MUX_nop /*MUX signal for IDEX*/);
+// 	if (MemRead == 1 && (IDEX_RegRt == Rs || IDEX_RegRt == Rt)) begin
+// 		// stall
                            
 /***************** Execution Unit (EX)  ****************/
                  
