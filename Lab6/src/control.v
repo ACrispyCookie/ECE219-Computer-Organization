@@ -66,16 +66,13 @@ endmodule
 
 /**************** Module for Bypass Detection in EX pipe stage goes here  *********/
 // TO FILL IN: Module details
-module EX_bypass_detector(output reg [1:0] ForwardA,
-                          output reg [1:0] ForwardB
-                          input [4:0] Rs, 
-                          input [4:0] Rt,) 
+module EX_bypass_detector(output reg [1:0] ForwardA, output reg [1:0] ForwardB, input [4:0] Rs, input [4:0] Rt);
 endmodule          
                        
 
 /**************** Module for Stall Detection in ID pipe stage goes here  *********/
 // TO FILL IN: Module details 
-module ID_stall_detector()
+module ID_stall_detector();
 endmodule
                        
 /************** control for ALU control in EX pipe stage  *************/
