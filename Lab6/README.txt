@@ -1,6 +1,6 @@
-
+v 1.0
 Changes: 
-	- Allaja sto control.v to HazardUnit an den kanw la8os
+	- Allaja sto control.v to HazardUnit an den kanw la8os (NOT TESTED)
 	- Added ReadMe
 	- fixed syntax errors classic :)
 
@@ -13,3 +13,17 @@ TODO:
 		- Add Forwarding unit (should be ez)
 		- Boss: 
 			- Make registed MEM, opoion allon 8elei
+
+
+v 1.2
+
+Changes: 
+	- Finished Forwarding Unit (NOT TESTED)
+		Note: Needs wiring to cpu circuitry i think 
+	- Finished HazardUnit (NOT TESTED)
+
+TODO:
+	- Do the the "TO FILL"s
+	- WB logic (NO IDEA)
+	- Boss: 
+		- Make registed MEM, opoion allon 8elei

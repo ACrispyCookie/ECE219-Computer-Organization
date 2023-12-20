@@ -29,42 +29,40 @@ module cpu(input clock, input reset);
  wire [1:0] ALUcntrl;
  wire [15:0] imm;
 
- wire		IFID_Write;
-
- 
- 
+ wire IFID_Write, PC_Write, MUX_nop;
 
 /***************** Instruction Fetch Unit (IF)  ****************/
  always @(posedge clock or negedge reset)
   begin 
-    if (reset == 1'b0)     
-       PC <= -1;     
-    else if (PC == -1)
-       PC <= 0;
-    else 
-       PC <= PC + 4;
+    if (PC_Write == 1) begin
+		if (reset == 1'b0)     
+    	   PC <= -1;     
+    	else if (PC == -1)
+    	   PC <= 0;
+    	else 
+    	   PC <= PC + 4;
+	end
   end
   
   // IFID pipeline register
  always @(posedge clock or negedge reset)
   begin 
-    if (reset == 1'b0)     
-      begin
-       IFID_PCplus4 <= 32'b0;    
-       IFID_instr <= 32'b0;
-    end 
-    else 
-      begin
-       IFID_PCplus4 <= PC + 32'd4;
-       IFID_instr <= instr;
-    end
+    if (IFID_Write == 1) begin
+		if (reset == 1'b0)     
+    	  begin
+    	   IFID_PCplus4 <= 32'b0;    
+    	   IFID_instr <= 32'b0;
+    	end 
+    	else 
+    	  begin
+    	   IFID_PCplus4 <= PC + 32'd4;
+    	   IFID_instr <= instr;
+    	end
+	end
   end
   
 // TO FILL IN: Instantiate the Instruction Memory here 
 Memory IMem (1'b1, 1'b0, {2'b00, PC[31:2]}, 0, instr);
-  
-  
-  
 
 /***************** Instruction Decode Unit (ID)  ****************/
 assign opcode = IFID_instr[31:26];
@@ -77,6 +75,21 @@ assign signExtend = {{16{imm[15]}}, imm};
 
 // Register file
 RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_RegWrite, wRegData, rdA, rdB);
+// Main Control Unit 
+control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
+
+
+// TO FILL IN: Instantiation of Control Unit that generates stalls
+ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_instr_rt, IFID_Write, PC_Write, MUX_nop);
+
+assign IDEX_RegWrite = (MUX_nop == 1) ? 0 : RegWrite;
+assign IDEX_MemToReg = (MUX_nop == 1) ? 0 : MemToReg;
+assign IDEX_MemRead = (MUX_nop == 1) ? 0 : MemRead;
+assign IDEX_MemWrite = (MUX_nop == 1) ? 0 : MemWrite;
+assign IDEX_Branch = (MUX_nop == 1) ? 0 : Branch;
+assign IDEX_ALUSrc = (MUX_nop == 1) ? 0 : ALUSrc;
+assign IDEX_ALUOp = (MUX_nop == 1) ? 0 : ALUOp;
+assign IDEX_RegDst = (MUX_nop == 1) ? 0 : RegDst;
 
   // IDEX pipeline register
  always @(posedge clock or negedge reset)
@@ -90,7 +103,7 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
        IDEX_instr_rs <= 5'b0;
        IDEX_instr_rt <= 5'b0;
        IDEX_RegDst <= 1'b0;
-       IDEX_ALUcntrl <= 2'b0;
+       IDEX_ALUcntrl <= 2'b0; // AKA ALUOp why rename it :)?????? for the lols i guess!
        IDEX_ALUSrc <= 1'b0;
        IDEX_Branch <= 1'b0;
        IDEX_MemRead <= 1'b0;
@@ -115,26 +128,22 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
        IDEX_MemToReg <= MemToReg;                  
        IDEX_RegWrite <= RegWrite;
     end
+
+	EXMEM_RegWrite = IDEX_RegWrite;
+	EXMEM_MemToReg = IDEX_MemToReg;
+	EXMEM_MemRead = IDEX_MemRead;
+	EXMEM_MemWrite = IDEX_MemWrite;
+	EXMEM_Branch =  IDEX_Branch;
   end
 
-// Main Control Unit 
-control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
-                  
-// TO FILL IN: Instantiation of Control Unit that generates stalls
-ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_instr_rt, IFID_Write, PC_Write, MUX_nop);
-
-
-// module ID_stall_detector(input [4:0] Rs, input [4:0] Rt, input IDEX_MemRead, input [4:0] IDEX_RegRt, output reg IFID_Write, output reg PC_Write, output reg MUX_nop /*MUX signal for IDEX*/);
-// 	if (MemRead == 1 && (IDEX_RegRt == Rs || IDEX_RegRt == Rt)) begin
-// 		// stall
-                           
 /***************** Execution Unit (EX)  ****************/
+
                  
 assign ALUInA = IDEX_rdA;
                  
 assign ALUInB = (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend;
 
-//  ALU
+//  ALU	
 ALU  #(32) cpu_alu(ALUOut, Zero, ALUInA, ALUInB, ALUOp);
 
 assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
@@ -166,16 +175,36 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
        EXMEM_MemToReg <= IDEX_MemToReg;                  
        EXMEM_RegWrite <= IDEX_RegWrite;
       end
+
+	MEMWB_RegWrite <= EXMEM_RegWrite;
+	MEMWB_MemToReg <= EXMEM_MemToReg;
   end
   
   // ALU control
   control_alu control_alu(ALUOp, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
   
    // TO FILL IN: Instantiation of control logic for Forwarding goes here
-  
 
-  
-  
+EX_bypass_detector ForwardingUnit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt, EXMEM_instr_rd, MEMWB_instr_rd, EXMEM_RegWrite);
+
+always @* begin
+	// ALUinA MUX
+	case (ForwardA)
+		2'b00: ALUInA <= IDEX_rdA;
+		2'b01: ALUInA <= MEMWB_MemToReg;
+		2'b10: ALUInA <= EXMEM_ALUOut;
+		default: ALUInA <= ALUInA;
+	endcase
+	// ALUInB MUX
+	case (ForwardB)
+		2'b00: ALUInB <= IDEX_rdB;
+		2'b01: ALUInB <= MEMWB_MemToReg;
+		2'b10: ALUInB <= EXMEM_ALUOut;
+		default: ALUInB <= ALUInB;
+	endcase
+end
+// TO FILL IN: Module details
+
   
 /***************** Memory Unit (MEM)  ****************/  
 
@@ -205,9 +234,6 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
       end
   end
 
-  
-  
-  
 
 /***************** WriteBack Unit (WB)  ****************/  
 // TO FILL IN: Write Back logic 
