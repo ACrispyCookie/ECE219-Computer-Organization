@@ -125,14 +125,14 @@ ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_MemRead, IDEX_instr_rt, I
                            
 /***************** Execution Unit (EX)  ****************/
                  
-assign ALUInA = (ForwardA == 1'b00) ? IDEX_rdA :
-                (ForwardA == 1'b01) ? wRegData :
-                (ForwardA == 1'b10) ? EXMEM_ALUOut :
+assign ALUInA = (ForwardA == 2'b00) ? IDEX_rdA :
+                (ForwardA == 2'b01) ? wRegData :
+                (ForwardA == 2'b10) ? EXMEM_ALUOut :
                 IDEX_rdA;
                  
-assign ALUInB = (ForwardB == 1'b00) ? (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend : 
-                (ForwardB == 1'b01) ? EXMEM_ALUOut : 
-                (ForwardB == 1'b10) ? wRegData : 
+assign ALUInB = (ForwardB == 2'b00) ? (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend : 
+                (ForwardB == 2'b01) ? EXMEM_ALUOut : 
+                (ForwardB == 2'b10) ? wRegData : 
                 (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend;
 
 //  ALU
@@ -153,8 +153,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
        EXMEM_MemRead <= 1'b0;
        EXMEM_MemWrite <= 1'b0;
        EXMEM_MemToReg <= 1'b0;                  
-       EXMEM_RegWrite <= 1'b0;                  
-       EXMEM_instr_rd <= 1'b0;
+       EXMEM_RegWrite <= 1'b0;       
       end 
     else 
       begin
@@ -166,14 +165,13 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
        EXMEM_MemRead <= IDEX_MemRead;
        EXMEM_MemWrite <= IDEX_MemWrite;
        EXMEM_MemToReg <= IDEX_MemToReg;                  
-       EXMEM_RegWrite <= IDEX_RegWrite;                  
-       EXMEM_instr_rd <= IDEX_instr_rd;
+       EXMEM_RegWrite <= IDEX_RegWrite;
       end
   end
   
   // ALU control
   control_alu control_alu(ALUOp, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
-  EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_rdA, IDEX_rdB, 
+  EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rt, IDEX_instr_rs, 
   EXMEM_RegWriteAddr, MEMWB_RegWriteAddr, EXMEM_RegWrite, MEMWB_RegWrite);
 
   
@@ -194,8 +192,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
        MEMWB_ALUOut <= 32'b0;
        MEMWB_RegWriteAddr <= 5'b0;
        MEMWB_MemToReg <= 1'b0;
-       MEMWB_RegWrite <= 1'b0;                 
-       MEMWB_instr_rd <= 1'b0;
+       MEMWB_RegWrite <= 1'b0;
       end 
     else 
       begin
@@ -203,8 +200,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
        MEMWB_ALUOut <= EXMEM_ALUOut;
        MEMWB_RegWriteAddr <= EXMEM_RegWriteAddr;
        MEMWB_MemToReg <= EXMEM_MemToReg;                  
-       MEMWB_RegWrite <= EXMEM_RegWrite;                 
-       MEMWB_instr_rd <= EXMEM_instr_rd;
+       MEMWB_RegWrite <= EXMEM_RegWrite;
       end
   end
 

@@ -75,14 +75,14 @@ module EX_bypass_detector(output reg [1:0] ForwardA, output reg [1:0] ForwardB,
   always @(*) begin
     if (EXMEM_RegWrite && EXMEM_RegisterRd != 0 && EXMEM_RegisterRd == IDEX_RegisterRs)
       ForwardA <= 2'b10;
-    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRs)
+    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRs && (EXMEM_RegisterRd != IDEX_RegisterRs || EXMEM_RegWrite == 0))
       ForwardA <= 2'b01;
     else
       ForwardA <= 2'b00;
     
-    if(EXMEM_RegWrite && EXMEM_RegisterRd != 0 && EXMEM_RegisterRd == IDEX_RegisterRt)
+    if (EXMEM_RegWrite && EXMEM_RegisterRd != 0 && EXMEM_RegisterRd == IDEX_RegisterRt)
       ForwardB <= 2'b01;
-    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRt)
+    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRt && (EXMEM_RegisterRd != IDEX_RegisterRt || EXMEM_RegWrite == 0))
       ForwardB <= 2'b10;
     else
       ForwardB <= 2'b00;
