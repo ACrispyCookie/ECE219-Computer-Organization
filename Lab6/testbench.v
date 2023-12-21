@@ -93,6 +93,7 @@ always@(negedge clock)
        80: $fwrite(f,"addi $s6, $s6, -100: %s\n", (cpu0.cpu_regs.data[22]==32'h00037f9c)  ?"PASS" : "FAIL");
        88:   $fclose(f);  
 endcase
+
  // add $t0, $t0, $s0    # $t0 = $8 = 24 (D) 
  // sw $ra, 4($t2)       # Mem[$t2+4] = 31
  // lw $t5, 4($t2)       # $t5 = $13 = 31

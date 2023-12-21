@@ -60,6 +60,29 @@ module control_main(output reg RegDst,
             Branch = 1'b1;
             ALUcntrl = 2'b01;
            end
+	   `ADDI:
+		   begin 
+			RegDst = 1'b0;
+			MemRead = 1'b0;
+			MemWrite = 1'b0;
+			ALUSrc = 1'b1;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			Branch = 1'b0;
+			ALUcntrl = 2'b10;
+		   end
+	   default:
+	   	   //NOP
+		   begin 
+			RegDst = 1'b0;
+			MemRead = 1'b0;
+			MemWrite = 1'b0;
+			ALUSrc = 1'b0;
+			MemToReg = 1'b0;
+			RegWrite = 1'b0;
+			Branch = 1'b0;
+			ALUcntrl = 2'b00;
+		   end
       endcase
     end // always
 endmodule
@@ -73,19 +96,28 @@ module EX_bypass_detector(output reg [1:0] ForwardA, output reg [1:0] ForwardB,
                           input EXMEM_RegWrite, input MEMWB_RegWrite);
           
   always @(*) begin
-    if (EXMEM_RegWrite && EXMEM_RegisterRd != 0 && EXMEM_RegisterRd == IDEX_RegisterRs)
-      ForwardA <= 2'b10;
-    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRs && (EXMEM_RegisterRd != IDEX_RegisterRs || EXMEM_RegWrite == 0))
-      ForwardA <= 2'b01;
-    else
-      ForwardA <= 2'b00;
-    
-    if (EXMEM_RegWrite && EXMEM_RegisterRd != 0 && EXMEM_RegisterRd == IDEX_RegisterRt)
-      ForwardB <= 2'b01;
-    else if (MEMWB_RegWrite && MEMWB_RegisterRd != 0 && MEMWB_RegisterRd == IDEX_RegisterRt && (EXMEM_RegisterRd != IDEX_RegisterRt || EXMEM_RegWrite == 0))
-      ForwardB <= 2'b10;
-    else
-      ForwardB <= 2'b00;
+	ForwardA <= 2'b00;
+	ForwardB <= 2'b00;
+
+	// EXMEM Forwarding
+    if (EXMEM_RegWrite == 1 && EXMEM_RegisterRd != 0) begin
+		if (EXMEM_RegisterRd == IDEX_RegisterRs) begin
+			ForwardA <= 2'b10;
+		end
+		if (EXMEM_RegisterRd == IDEX_RegisterRt) begin
+			ForwardB <= 2'b01;
+		end
+	end
+	
+	// MEMWB Forwarding
+	if (MEMWB_RegWrite == 1 && MEMWB_RegisterRd != 0) begin
+		if (MEMWB_RegisterRd == IDEX_RegisterRs && (EXMEM_RegisterRd != IDEX_RegisterRs || EXMEM_RegWrite == 0)) begin
+			ForwardA <= 2'b01;
+		end
+		if (MEMWB_RegisterRd == IDEX_RegisterRt && (EXMEM_RegisterRd != IDEX_RegisterRt || EXMEM_RegWrite == 0)) begin
+			ForwardB <= 2'b10;
+		end
+	end
   end
 endmodule          
                        
@@ -129,6 +161,7 @@ module control_alu(output reg [3:0] ALUOp,
               6'b100101: ALUOp = 4'b0001; // or
               6'b100111: ALUOp = 4'b1100; // nor
               6'b101010: ALUOp = 4'b0111; // slt
+              `SLL: ALUOp = 4'b0100; // sll
               default: ALUOp = 4'b0000;       
              endcase 
           end   
