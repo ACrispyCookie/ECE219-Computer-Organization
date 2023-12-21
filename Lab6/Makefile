@@ -1,12 +1,12 @@
 CC = iverilog
 FLAGS = -Wall -Winfloop
-EXE = ./out/lab6a.out
-SRCS = ./src/control.v ./src/library.v ./src/cpu.v ./src/testbench.v
+EXE = lab6a.out
+SRCS = control.v library.v cpu.v testbench.v
 
 all:
 	$(CC) $(FLAGS) -o $(EXE) $(SRCS)
 	vvp $(EXE)
-	gtkwave ./out/tb_dumpfile.vcd ./out/waveform.gtkw
+	gtkwave tb_dumpfile.vcd waveform.gtkw
 
 clean:
 	rm -rf $(EXE)
