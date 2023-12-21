@@ -167,6 +167,11 @@ module control_alu(output reg [3:0] ALUOp, output reg ALUshamt, input [1:0] ALUc
             ALUshamt = 1'b1;
           end
           `SLLV: ALUOp = 4'b0100; // sllv
+          `SRL: begin // srl
+            ALUOp = 4'b0101;
+            ALUshamt = 1'b1;
+          end
+          `SRLV: ALUOp = 4'b0101; // srlv
           default: ALUOp = 4'b0000;       
           endcase 
         end   

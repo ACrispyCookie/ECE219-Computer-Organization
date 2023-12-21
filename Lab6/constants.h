@@ -4,7 +4,7 @@
 // R-format
 `define R_FORMAT  6'b0
 `define SLL 6'b000000
-`define SRL 6'000010
+`define SRL 6'b000010
 `define SLLV 6'b000100
 `define SRLV 6'b000110
 `define ADD 6'b100000            
