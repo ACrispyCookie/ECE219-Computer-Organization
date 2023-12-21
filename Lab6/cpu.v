@@ -124,7 +124,7 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
 
 
 // Main Control Unit 
-control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode, ALUshamt);
+control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
                   
 // TO FILL IN: Instantiation of Control Unit that generates stalls
 ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_MemRead, IDEX_instr_rt, IFID_write, IFID_PCwrite, IFID_isNOP);
@@ -178,7 +178,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
   end
   
   // ALU control
-  control_alu control_alu(ALUOp, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
+  control_alu control_alu(ALUOp, ALUshamt, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
   EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt, 
   EXMEM_RegWriteAddr, MEMWB_RegWriteAddr, EXMEM_RegWrite, MEMWB_RegWrite);
 

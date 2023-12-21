@@ -147,36 +147,40 @@ endmodule
 /************** control for ALU control in EX pipe stage  *************/
 
 // Spirit syntax :)
-module control_alu(output reg [3:0] ALUOp, input [1:0] ALUcntrl, input [5:0] func, output reg ALUshamt);
+module control_alu(output reg [3:0] ALUOp, output reg ALUshamt, input [1:0] ALUcntrl, input [5:0] func);
 
   always @(ALUcntrl or func)  
-    begin
-      case (ALUcntrl)
-        2'b10: 
-           begin
-             ALUshamt = 1'b0;
-             case (func)
-              6'b100000: ALUOp  = 4'b0010; // add
-              6'b100010: ALUOp = 4'b0110; // sub
-              6'b100100: ALUOp = 4'b0000; // and
-              6'b100101: ALUOp = 4'b0001; // or
-              6'b100111: ALUOp = 4'b1100; // nor
-              6'b101010: ALUOp = 4'b0111; // slt
-              `SLL: // sll
-			  	ALUOp = 4'b0100; 
-				ALUshamt = 1'b1;
-              default: ALUOp = 4'b0000;       
-             endcase 
-          end   
-        2'b00: 
-              ALUOp  = 4'b0010; // add
-			  ALUshamt = 1'b0;
-        2'b01: 
-              ALUOp = 4'b0110; // sub
-			  ALUshamt = 1'b0;
-		default:
-              ALUOp = 4'b0000;
-			  ALUshamt = 1'b0;
-     endcase
+  begin
+    case (ALUcntrl)
+      2'b10: 
+        begin
+          ALUshamt = 1'b0;
+          case (func)
+          6'b100000: ALUOp  = 4'b0010; // add
+          6'b100010: ALUOp = 4'b0110; // sub
+          6'b100100: ALUOp = 4'b0000; // and
+          6'b100101: ALUOp = 4'b0001; // or
+          6'b100111: ALUOp = 4'b1100; // nor
+          6'b101010: ALUOp = 4'b0111; // slt
+          `SLL: begin // sll
+            ALUOp = 4'b0100; 
+            ALUshamt = 1'b1;
+          end
+          default: ALUOp = 4'b0000;       
+          endcase 
+        end   
+      2'b00: begin
+        ALUOp  = 4'b0010; // add
+        ALUshamt = 1'b0;
+      end
+      2'b01: begin
+        ALUOp = 4'b0110; // sub
+        ALUshamt = 1'b0;
+      end
+		default: begin
+      ALUOp = 4'b0000;
+      ALUshamt = 1'b0;
     end
+    endcase
+  end
 endmodule
