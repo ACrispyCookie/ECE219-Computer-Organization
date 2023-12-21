@@ -145,16 +145,16 @@ module ID_stall_detector(input [4:0] IFID_RegRs, input [4:0] IFID_RegRt, input I
 endmodule
                        
 /************** control for ALU control in EX pipe stage  *************/
-module control_alu(output reg [3:0] ALUOp,                 
-               input [1:0] ALUcntrl,
-               input [5:0] func);
+
+// Spirit syntax :)
+module control_alu(output reg [3:0] ALUOp, input [1:0] ALUcntrl, input [5:0] func, output reg ALUshamt);
 
   always @(ALUcntrl or func)  
     begin
       case (ALUcntrl)
         2'b10: 
            begin
-             
+             ALUshamt = 1'b0;
              case (func)
               6'b100000: ALUOp  = 4'b0010; // add
               6'b100010: ALUOp = 4'b0110; // sub
@@ -162,16 +162,21 @@ module control_alu(output reg [3:0] ALUOp,
               6'b100101: ALUOp = 4'b0001; // or
               6'b100111: ALUOp = 4'b1100; // nor
               6'b101010: ALUOp = 4'b0111; // slt
-              `SLL: ALUOp = 4'b0100; // sll
+              `SLL: // sll
+			  	ALUOp = 4'b0100; 
+				ALUshamt = 1'b1;
               default: ALUOp = 4'b0000;       
              endcase 
           end   
         2'b00: 
               ALUOp  = 4'b0010; // add
+			  ALUshamt = 1'b0;
         2'b01: 
               ALUOp = 4'b0110; // sub
-        default:
+			  ALUshamt = 1'b0;
+		default:
               ALUOp = 4'b0000;
+			  ALUshamt = 1'b0;
      endcase
     end
 endmodule
