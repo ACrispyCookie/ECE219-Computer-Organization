@@ -22,10 +22,10 @@ module cpu(input clock, input reset);
  reg [4:0]  MEMWB_RegWriteAddr, MEMWB_instr_rd; 
  reg [31:0] MEMWB_ALUOut;
  reg        MEMWB_MemToReg, MEMWB_RegWrite;  
- wire [31:0] instr, ALUInA, ALUInB, ALUOut, rdA, rdB, signExtend, DMemOut, wRegData, PCIncr;
+ wire [31:0] instr, ALUInA, ALUInB, ALUOut, rdA, rdB, signExtend, DMemOut, wRegData, PCIncr, ALUSrcIn;
  wire Zero, RegDst, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, Branch;
  wire [5:0] opcode, func;
- wire [4:0] instr_rs, instr_rt, instr_rd, RegWriteAddr;
+ wire [4:0] instr_rs, instr_rt, instr_rd, RegWriteAddr, instr_shamt;
  wire [3:0] ALUOp;
  wire [1:0] ALUcntrl;
  wire [15:0] imm;
@@ -130,10 +130,11 @@ assign ALUInA = (ForwardA == 2'b00) ? IDEX_rdA :
                 (ForwardA == 2'b10) ? EXMEM_ALUOut :
                 IDEX_rdA;
                  
-assign ALUInB = (ForwardB == 2'b00) ? (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend : 
-                (ForwardB == 2'b01) ? EXMEM_ALUOut : 
-                (ForwardB == 2'b10) ? wRegData : 
-                (IDEX_ALUSrc == 1'b0) ? IDEX_rdB : IDEX_signExtend;
+assign ALUInB = (IDEX_ALUSrc == 1'b0) ? ALUSrcIn : IDEX_signExtend;
+
+assign ALUSrcIn = (ForwardB == 2'b01) ? EXMEM_ALUOut :
+                  (ForwardB == 2'b10) ? wRegData :
+                  IDEX_rdB;
 
 //  ALU
 ALU  #(32) cpu_alu(ALUOut, Zero, ALUInA, ALUInB, ALUOp);
@@ -159,7 +160,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
       begin
        EXMEM_ALUOut <= ALUOut;    
        EXMEM_RegWriteAddr <= RegWriteAddr;
-       EXMEM_MemWriteData <= IDEX_rdB;
+       EXMEM_MemWriteData <= ALUSrcIn;
        EXMEM_Zero <= Zero;
        EXMEM_Branch <= IDEX_Branch;
        EXMEM_MemRead <= IDEX_MemRead;

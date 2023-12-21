@@ -145,7 +145,7 @@ module ID_stall_detector(input [4:0] IFID_RegRs, input [4:0] IFID_RegRt, input I
 endmodule
                        
 /************** control for ALU control in EX pipe stage  *************/
-module control_alu(output reg [3:0] ALUOp,                  
+module control_alu(output reg [3:0] ALUOp,                 
                input [1:0] ALUcntrl,
                input [5:0] func);
 
@@ -154,6 +154,7 @@ module control_alu(output reg [3:0] ALUOp,
       case (ALUcntrl)
         2'b10: 
            begin
+             
              case (func)
               6'b100000: ALUOp  = 4'b0010; // add
               6'b100010: ALUOp = 4'b0110; // sub
