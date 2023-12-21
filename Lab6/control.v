@@ -68,7 +68,7 @@ endmodule
 /**************** Module for Bypass Detection in EX pipe stage goes here  *********/
 // TO FILL IN: Module details
 module EX_bypass_detector(output reg [1:0] ForwardA, output reg [1:0] ForwardB, 
-                          input [4:0] IDEX_RegisterRt, input [4:0] IDEX_RegisterRs, 
+                          input [4:0] IDEX_RegisterRs, input [4:0] IDEX_RegisterRt, 
                           input [4:0] EXMEM_RegisterRd, input [4:0] MEMWB_RegisterRd,
                           input EXMEM_RegWrite, input MEMWB_RegWrite);
           

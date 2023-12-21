@@ -171,7 +171,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
   
   // ALU control
   control_alu control_alu(ALUOp, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
-  EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rt, IDEX_instr_rs, 
+  EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt, 
   EXMEM_RegWriteAddr, MEMWB_RegWriteAddr, EXMEM_RegWrite, MEMWB_RegWrite);
 
   
