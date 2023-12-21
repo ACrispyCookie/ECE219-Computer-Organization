@@ -62,14 +62,14 @@ module control_main(output reg RegDst,
            end
 	   `ADDI:
 		   begin 
-			RegDst = 1'b0;
-			MemRead = 1'b0;
-			MemWrite = 1'b0;
-			ALUSrc = 1'b1;
-			MemToReg = 1'b0;
-			RegWrite = 1'b1;
-			Branch = 1'b0;
-			ALUcntrl = 2'b10;
+        RegDst = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        ALUSrc = 1'b1;
+        MemToReg = 1'b0;
+        RegWrite = 1'b1;
+        Branch = 1'b0;
+        ALUcntrl = 2'b00;
 		   end
 	   default:
 	   	   //NOP
@@ -166,6 +166,7 @@ module control_alu(output reg [3:0] ALUOp, output reg ALUshamt, input [1:0] ALUc
             ALUOp = 4'b0100; 
             ALUshamt = 1'b1;
           end
+          `SLLV: ALUOp = 4'b0100; // sllv
           default: ALUOp = 4'b0000;       
           endcase 
         end   

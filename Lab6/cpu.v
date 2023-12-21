@@ -8,10 +8,10 @@ module cpu(input clock, input reset);
  reg [31:0] IFID_PCplus4;
  reg [31:0] IFID_instr;       
  reg [31:0] IDEX_rdA, IDEX_rdB, IDEX_signExtend;
- reg [4:0]  IDEX_instr_rt, IDEX_instr_rs, IDEX_instr_rd, IDEX_shmat;                            
+ reg [4:0]  IDEX_instr_rt, IDEX_instr_rs, IDEX_instr_rd, IDEX_instr_shamt;                            
  reg        IDEX_RegDst, IDEX_ALUSrc;
  reg [1:0]  IDEX_ALUcntrl;
- reg        IDEX_Branch, IDEX_MemRead, IDEX_MemWrite, IDEX_ALUshamt; 
+ reg        IDEX_Branch, IDEX_MemRead, IDEX_MemWrite; 
  reg        IDEX_MemToReg, IDEX_RegWrite;                
  reg [4:0]  EXMEM_RegWriteAddr, EXMEM_instr_rd; 
  reg [31:0] EXMEM_ALUOut;
@@ -30,10 +30,9 @@ module cpu(input clock, input reset);
  wire [1:0] ALUcntrl;
  wire [15:0] imm;
  wire [1:0]  ForwardA, ForwardB;
- wire        IFID_isNOP;             
+ wire        IFID_isNOP, IDEX_ALUshamt;             
  wire        IFID_write;                  
  wire        IFID_PCwrite;  
- wire 		 ALUshamt;
  
  
 
@@ -85,8 +84,7 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
   begin 
     if (reset == 1'b0 || IFID_isNOP)
       begin
-	   IDEX_shmat <= 5'b0;
-	   IDEX_ALUshamt <= 1'b0;
+      IDEX_instr_shamt <= 5'b0;
        IDEX_rdA <= 32'b0;    
        IDEX_rdB <= 32'b0;
        IDEX_signExtend <= 32'b0;
@@ -103,8 +101,7 @@ RegFile cpu_regs(clock, reset, instr_rs, instr_rt, MEMWB_RegWriteAddr, MEMWB_Reg
        IDEX_RegWrite <= 1'b0;
     end 
     else begin
-	  IDEX_ALUshamt <= ALUshamt;
-	  IDEX_shmat <= instr_shamt;
+      IDEX_instr_shamt <= instr_shamt;
       IDEX_rdA <= rdA;
       IDEX_rdB <= rdB;
       IDEX_signExtend <= signExtend;
@@ -131,7 +128,8 @@ ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_MemRead, IDEX_instr_rt, I
                            
 /***************** Execution Unit (EX)  ****************/
                  
-assign ALUInA = (ForwardA == 2'b00) ? IDEX_rdA :
+assign ALUInA = (IDEX_ALUshamt == 1) ? IDEX_instr_shamt : 
+                (ForwardA == 2'b00) ? IDEX_rdA :
                 (ForwardA == 2'b01) ? wRegData :
                 (ForwardA == 2'b10) ? EXMEM_ALUOut :
                 IDEX_rdA;
@@ -141,7 +139,7 @@ assign ALUSrcIn = (ForwardB == 2'b01) ? EXMEM_ALUOut :
                   (ForwardB == 2'b10) ? wRegData :
                   IDEX_rdB;
 
-assign ALUInB = (IDEX_ALUshamt == 1) ? instr_shamt : (IDEX_ALUSrc == 1'b0) ? ALUSrcIn : IDEX_signExtend;
+assign ALUInB = (IDEX_ALUSrc == 1'b0) ? ALUSrcIn : IDEX_signExtend;
 
 //  ALU
 ALU  #(32) cpu_alu(ALUOut, Zero, ALUInA, ALUInB, ALUOp);
@@ -178,7 +176,7 @@ assign RegWriteAddr = (IDEX_RegDst==1'b0) ? IDEX_instr_rt : IDEX_instr_rd;
   end
   
   // ALU control
-  control_alu control_alu(ALUOp, ALUshamt, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
+  control_alu control_alu(ALUOp, IDEX_ALUshamt, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
   EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt, 
   EXMEM_RegWriteAddr, MEMWB_RegWriteAddr, EXMEM_RegWrite, MEMWB_RegWrite);
 
