@@ -7,30 +7,30 @@ module cpu(input clock, input reset);
   reg [31:0] PC;
   reg [31:0] IFID_PCplus4;
   reg [31:0] IFID_instr;
-  reg [31:0] IDEX_rdA, IDEX_rdB, IDEX_signExtend;
+  reg [31:0] IDEX_rdA, IDEX_rdB, IDEX_signExtend, IDEX_PCplus4;
   reg [4:0] IDEX_instr_rt, IDEX_instr_rs, IDEX_instr_rd, IDEX_instr_shamt;
   reg IDEX_RegDst, IDEX_ALUSrc;
   reg [1:0] IDEX_ALUcntrl;
-  reg IDEX_Branch, IDEX_MemRead, IDEX_MemWrite;
+  reg IDEX_Branch, IDEX_MemRead, IDEX_MemWrite, IDEX_Bne;
   reg IDEX_MemToReg, IDEX_RegWrite;
   reg [4:0] EXMEM_RegWriteAddr, EXMEM_instr_rd;
   reg [31:0] EXMEM_ALUOut;
   reg EXMEM_Zero;
-  reg [31:0] EXMEM_MemWriteData;
-  reg EXMEM_Branch, EXMEM_MemRead, EXMEM_MemWrite, EXMEM_RegWrite, EXMEM_MemToReg;
+  reg [31:0] EXMEM_MemWriteData, EXMEM_BranchAddr;
+  reg EXMEM_Branch, EXMEM_MemRead, EXMEM_MemWrite, EXMEM_RegWrite, EXMEM_MemToReg, EXMEM_Bne;
   reg [31:0] MEMWB_DMemOut;
   reg [4:0] MEMWB_RegWriteAddr, MEMWB_instr_rd;
   reg [31:0] MEMWB_ALUOut;
   reg MEMWB_MemToReg, MEMWB_RegWrite;
-  wire [31:0] instr, ALUInA, ALUInB, ALUOut, rdA, rdB, signExtend, DMemOut, wRegData, PCIncr, ALUSrcIn;
-  wire Zero, RegDst, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, Branch;
+  wire [31:0] instr, ALUInA, ALUInB, ALUOut, rdA, rdB, signExtend, DMemOut, wRegData, PCIncr, ALUSrcIn, BranchAddr;
+  wire Zero, RegDst, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, Branch, Bne, Jump, PCSrc;
   wire [5:0] opcode, func;
   wire [4:0] instr_rs, instr_rt, instr_rd, RegWriteAddr, instr_shamt;
   wire [3:0] ALUOp;
   wire [1:0] ALUcntrl;
   wire [15:0] imm;
   wire [1:0] ForwardA, ForwardB;
-  wire IFID_isNOP, IDEX_ALUshamt;
+  wire bubble_idex, bubble_ifid, bubble_exmem, IDEX_ALUshamt;
   wire IFID_write;
   wire IFID_PCwrite;
 
@@ -42,13 +42,18 @@ module cpu(input clock, input reset);
     else if (PC == -1)
       PC <= 0;
     else if (IFID_PCwrite)
-      PC <= PC + 4;
+      if (PCSrc == 1'b1)
+        PC <= EXMEM_BranchAddr;
+      else if (Jump == 1'b1)
+        PC <= {IFID_PCplus4[31:28], IFID_instr[25:0], 2'b00};
+      else
+        PC <= PC + 4;
   end
 
   // IFID pipeline register
   always @(posedge clock or negedge reset)
   begin
-    if (reset == 1'b0)
+    if (reset == 1'b0 || bubble_ifid)
     begin
       IFID_PCplus4 <= 32'b0;
       IFID_instr <= 32'b0;
@@ -82,7 +87,7 @@ module cpu(input clock, input reset);
   // IDEX pipeline register
   always @(posedge clock or negedge reset)
   begin
-    if (reset == 1'b0 || IFID_isNOP)
+    if (reset == 1'b0 || bubble_idex)
     begin
       IDEX_instr_shamt <= 5'b0;
       IDEX_rdA <= 32'b0;
@@ -95,10 +100,12 @@ module cpu(input clock, input reset);
       IDEX_ALUcntrl <= 2'b0;
       IDEX_ALUSrc <= 1'b0;
       IDEX_Branch <= 1'b0;
+      IDEX_Bne <= 1'b0;
       IDEX_MemRead <= 1'b0;
       IDEX_MemWrite <= 1'b0;
       IDEX_MemToReg <= 1'b0;
       IDEX_RegWrite <= 1'b0;
+      IDEX_PCplus4 <= 1'b0;
     end
     else
     begin
@@ -113,18 +120,20 @@ module cpu(input clock, input reset);
       IDEX_ALUcntrl <= ALUcntrl;
       IDEX_ALUSrc <= ALUSrc;
       IDEX_Branch <= Branch;
+      IDEX_Bne <= Bne;
       IDEX_MemRead <= MemRead;
       IDEX_MemWrite <= MemWrite;
       IDEX_MemToReg <= MemToReg;
       IDEX_RegWrite <= RegWrite;
+      IDEX_PCplus4 <= IFID_PCplus4;
     end
   end
 
   // Main Control Unit
-  control_main control_main (RegDst, Branch, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
+  control_main control_main (RegDst, Branch, Bne, Jump, MemRead, MemWrite, MemToReg, ALUSrc, RegWrite, ALUcntrl, opcode);
 
   // TO FILL IN: Instantiation of Control Unit that generates stalls
-  ID_stall_detector HazardUnit (instr_rs, instr_rt, IDEX_MemRead, IDEX_instr_rt, IFID_write, IFID_PCwrite, IFID_isNOP);
+  HazardUnit HazardUnit (instr_rs, instr_rt, IDEX_MemRead, IDEX_Branch, Jump, PCSrc, IDEX_instr_rt, IFID_write, IFID_PCwrite, bubble_ifid, bubble_idex, bubble_exmem);
 
   /***************** Execution Unit (EX)  ****************/
   assign ALUInA = (IDEX_ALUshamt == 1) ? IDEX_instr_shamt :
@@ -139,6 +148,8 @@ module cpu(input clock, input reset);
 
   assign ALUInB = (IDEX_ALUSrc == 1'b0) ? ALUSrcIn : IDEX_signExtend;
 
+  assign BranchAddr = IDEX_PCplus4 + (IDEX_signExtend << 2);
+
   // ALU
   ALU #(32) cpu_alu(ALUOut, Zero, ALUInA, ALUInB, ALUOp);
 
@@ -147,7 +158,7 @@ module cpu(input clock, input reset);
   // EXMEM pipeline register
   always @(posedge clock or negedge reset)
   begin
-    if (reset == 1'b0)
+    if (reset == 1'b0 || bubble_exmem)
     begin
       EXMEM_ALUOut <= 32'b0;
       EXMEM_RegWriteAddr <= 5'b0;
@@ -158,6 +169,7 @@ module cpu(input clock, input reset);
       EXMEM_MemWrite <= 1'b0;
       EXMEM_MemToReg <= 1'b0;
       EXMEM_RegWrite <= 1'b0;
+      EXMEM_BranchAddr <= 32'b0;
     end
     else
     begin
@@ -166,19 +178,23 @@ module cpu(input clock, input reset);
       EXMEM_MemWriteData <= ALUSrcIn;
       EXMEM_Zero <= Zero;
       EXMEM_Branch <= IDEX_Branch;
+      EXMEM_Bne <= IDEX_Bne;
       EXMEM_MemRead <= IDEX_MemRead;
       EXMEM_MemWrite <= IDEX_MemWrite;
       EXMEM_MemToReg <= IDEX_MemToReg;
       EXMEM_RegWrite <= IDEX_RegWrite;
+      EXMEM_BranchAddr <= BranchAddr;
     end
   end
 
   // ALU control
   control_alu control_alu(ALUOp, IDEX_ALUshamt, IDEX_ALUcntrl, IDEX_signExtend[5:0]);
-  EX_bypass_detector forward_unit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt,
+  ForwardingUnit forward_unit(ForwardA, ForwardB, IDEX_instr_rs, IDEX_instr_rt,
                                   EXMEM_RegWriteAddr, MEMWB_RegWriteAddr, EXMEM_RegWrite, MEMWB_RegWrite);
 
   /***************** Memory Unit (MEM)  ****************/
+
+  assign PCSrc = EXMEM_Branch == 1'b1 && (EXMEM_Bne == 1'b1 && EXMEM_Zero == 1'b0 || EXMEM_Bne == 1'b0 && EXMEM_Zero == 1'b1);
 
   // Data memory 1KB
   // Instantiate the Data Memory here

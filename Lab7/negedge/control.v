@@ -5,6 +5,8 @@
 module control_main(
   output reg RegDst,
   output reg Branch,
+  output reg Bne,
+  output reg Jump,
   output reg MemRead,
   output reg MemWrite,
   output reg MemToReg,
@@ -27,6 +29,8 @@ always @(*) begin
         RegWrite = 1'b1;
         Branch = 1'b0;
         ALUcntrl = 2'b10;
+        Bne = 1'b0;
+        Jump = 1'b0;
       end
     `LW:
       begin
@@ -38,6 +42,8 @@ always @(*) begin
         RegWrite = 1'b1;
         Branch = 1'b0;
         ALUcntrl = 2'b00;
+        Bne = 1'b0;
+        Jump = 1'b0;
       end
     `SW:
       begin
@@ -49,6 +55,8 @@ always @(*) begin
         MemWrite = 1'b1;
         Branch = 1'b0;
         ALUcntrl = 2'b00;
+        Bne = 1'b0;
+        Jump = 1'b0;
       end
     `BEQ:
       begin
@@ -60,6 +68,34 @@ always @(*) begin
         RegWrite = 1'b0;
         Branch = 1'b1;
         ALUcntrl = 2'b01;
+        Bne = 1'b0;
+        Jump = 1'b0;
+      end
+    `BNE:
+      begin
+        RegDst = 1'b0;
+        ALUSrc = 1'b0;
+        MemToReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b1;
+        ALUcntrl = 2'b01;
+        Bne = 1'b1;
+        Jump = 1'b0;
+      end
+    `J:
+      begin
+        RegDst = 1'b0;
+        ALUSrc = 1'b0;
+        MemToReg = 1'b0;
+        RegWrite = 1'b0;
+        MemRead = 1'b0;
+        MemWrite = 1'b0;
+        Branch = 1'b0;
+        ALUcntrl = 2'b00;
+        Bne = 1'b0;
+        Jump = 1'b1;
       end
     `ADDI:
       begin
@@ -71,6 +107,8 @@ always @(*) begin
         RegWrite = 1'b1;
         Branch = 1'b0;
         ALUcntrl = 2'b00;
+        Bne = 1'b0;
+        Jump = 1'b0;
       end
     default:
       // NOP
@@ -83,6 +121,8 @@ always @(*) begin
         RegWrite = 1'b0;
         Branch = 1'b0;
         ALUcntrl = 2'b00;
+        Bne = 1'b0;
+        Jump = 1'b0;
       end
   endcase
 end // always
@@ -90,7 +130,7 @@ endmodule
 
 /**************** Module for Bypass Detection in EX pipe stage goes here  *********/
 // TO FILL IN: Module details
-module EX_bypass_detector(
+module ForwardingUnit(
   output reg [1:0] ForwardA,
   output reg [1:0] ForwardB,
   input [4:0] IDEX_RegisterRs,
@@ -131,27 +171,57 @@ endmodule
 // TO FILL IN: Module details
 // auto einai to HAZARD UNIT (logika ne) ??????????????????????????????????????????????????????????????????????????
 
-module ID_stall_detector(
+module HazardUnit(
   input [4:0] IFID_RegRs,
   input [4:0] IFID_RegRt,
   input IDEX_MemRead,
+  input IDEX_Branch,
+  input Jump,
+  input PCSrc,
   input [4:0] IDEX_RegRt,
   output reg IFID_Write,
   output reg PC_Write,
-  output reg MUX_nop /*MUX signal for IDEX*/
+  output reg bubble_ifid,
+  output reg bubble_idex,
+  output reg bubble_exmem
 );
 
 always @(*) begin
-  if (IDEX_MemRead == 1 && (IDEX_RegRt == IFID_RegRs || IDEX_RegRt == IFID_RegRt)) begin
+  if (PCSrc) begin
+    // flush
+    bubble_ifid = 1'b1;
+    bubble_idex = 1'b1;
+    bubble_exmem = 1'b1;
+    PC_Write = 1'b1;
+    IFID_Write = 1'b0;
+  end else if (IDEX_Branch == 1 && Jump == 1) begin
     // stall
     PC_Write = 1'b0;
     IFID_Write = 1'b0;
-    MUX_nop = 1'b1;
+    bubble_idex = 1'b1;
+    bubble_ifid = 1'b0;
+    bubble_exmem = 1'b0;
+  end else if(Jump == 1) begin
+    // flush
+    bubble_ifid = 1'b1;
+    bubble_idex = 1'b0;
+    bubble_exmem = 1'b0;
+    PC_Write = 1'b1;
+    IFID_Write = 1'b0;
+  end else if (IDEX_MemRead == 1 && (IDEX_RegRt == IFID_RegRs || IDEX_RegRt == IFID_RegRt)) begin
+    // stall
+    PC_Write = 1'b0;
+    IFID_Write = 1'b0;
+    bubble_idex = 1'b1;
+    bubble_ifid = 1'b0;
+    bubble_exmem = 1'b0;
   end else begin
     // do not stall
     PC_Write = 1'b1;
     IFID_Write = 1'b1;
-    MUX_nop = 1'b0;
+    bubble_idex = 1'b0;
+    bubble_ifid = 1'b0;
+    bubble_exmem = 1'b0;
   end
 end
 endmodule
@@ -189,6 +259,7 @@ always @(ALUcntrl or func) begin
               ALUshamt = 1'b1;
             end
           `SRLV: ALUOp = 4'b0101; // srlv
+          `XOR: ALUOp = 4'b0011; // xor
           default: ALUOp = 4'b0000;
         endcase
       end
