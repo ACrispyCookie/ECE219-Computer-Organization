@@ -75,7 +75,7 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
   wire [31:0] rdB = data[raB];
 
   // Make sure that register file is only written at the negative edge of the clock
-  always @(negedge clock or negedge reset)
+  always @(posedge clock or negedge reset)
     if (reset == 1'b0)
       for (i = 0; i < 32; i = i + 1)
         data[i] = i; // Note that R0 = 0 in MIPS
