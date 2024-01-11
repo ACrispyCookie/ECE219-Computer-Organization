@@ -61,24 +61,58 @@ endmodule
 // Register File. Read ports: address raA, data rdA
 //                            address raB, data rdB
 //                Write port: address wa, data wd, enable wen.
-module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
+module RegFile (clock, reset, bubble_idex, raA, raB, wa, wen, wd, rdA, rdB);
   input clock, reset;
   input [4:0] raA, raB, wa;
-  input wen;
+  input wen, bubble_idex;
   input [31:0] wd;
   output [31:0] rdA, rdB;
   integer i;
+  wire dataSrcA, dataSrcB;
 
   reg [31:0] data[31:0];
+  reg [31:0] EX_wd, EX_rdA, EX_rdB;
+  reg EX_dataSrcA, EX_dataSrcB, EX_wen;
 
-  wire [31:0] rdA = data[raA];
-  wire [31:0] rdB = data[raB];
-
-  // Make sure that register file is only written at the negative edge of the clock
+  assign dataSrcA = (raA == wa) ? 1'b1 : 1'b0;
+  assign dataSrcB = (raB == wa) ? 1'b1 : 1'b0;
+  
+  wire [31:0] rdA = (EX_wen == 1'b1 && EX_dataSrcA == 1'b1) ? EX_wd : EX_rdA;
+  wire [31:0] rdB = (EX_wen == 1'b1 && EX_dataSrcB == 1'b1) ? EX_wd : EX_rdB;
+  
   always @(posedge clock or negedge reset)
+  begin
     if (reset == 1'b0)
+    begin
+      EX_rdA <= 5'b0;
+      EX_rdB <= 5'b0;
+      EX_wd <= 32'b0;
+      EX_wen <= 1'b0;
+      EX_dataSrcA <= 1'b0;
+      EX_dataSrcB <= 1'b0;
       for (i = 0; i < 32; i = i + 1)
-        data[i] = i; // Note that R0 = 0 in MIPS
-    else if (wen == 1'b1 && wa != 5'b0)
-      data[wa] <= wd;
+        data[i] = i;
+    end
+    else
+    begin
+      EX_rdA <= data[raA];
+      EX_rdB <= data[raB];
+      EX_wd <= wd;
+      EX_wen <= wen;
+      EX_dataSrcA <= dataSrcA;
+      EX_dataSrcB <= dataSrcB;
+      if (wen == 1'b1 && wa != 5'b0)
+        data[wa] <= wd;
+      if (bubble_idex == 1'b1)
+      begin
+        EX_rdA <= 5'b0;
+        EX_rdB <= 5'b0;
+        EX_wd <= 32'b0;
+        EX_wen <= 1'b0;
+        EX_dataSrcA <= 1'b0;
+        EX_dataSrcB <= 1'b0;
+      end
+    end
+  end
+
 endmodule

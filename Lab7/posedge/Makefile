@@ -10,3 +10,5 @@ all:
 
 clean:
 	rm -rf $(EXE)
+	rm -rf tb_dumpfile.vcd
+	rm -rf output.txt
