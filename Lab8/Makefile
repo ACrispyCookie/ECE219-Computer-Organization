@@ -1,4 +1,4 @@
-SOURCES=qdbmp.c kmeans.c
+SOURCES=qdbmp.c kmeans-better.c
 TARGET=kmeans
 GCC=gcc
 CFLAGS=-O3 -Wall -std=c99

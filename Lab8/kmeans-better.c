@@ -92,8 +92,8 @@ int main( int argc, char* argv[] )
 	         The output of phase 2 is the cluster* data structure.                    */
 
 
-	  for ( col = 0 ; col < width ; ++col ) {
-		for ( row = 0 ; row < height ; ++row)  {
+	  for ( row = 0 ; row < height ; ++row)  {
+	  	for ( col = 0 ; col < width ; ++col ) {
 
 		
 			/* Calculate the location of the relevant pixel (rows are flipped) */
@@ -106,7 +106,7 @@ int main( int argc, char* argv[] )
 			for (i = 0; i < noClusters; ++i) {
 
                 /* Distance metric. May replace with something cheaper */
-				dist = (UINT) sqrt((r-means[i].r)*(r-means[i].r) + (g-means[i].g)*(g-means[i].g) + (b-means[i].b)*(b-means[i].b));
+				dist = (UINT) (abs(r-means[i].r) + abs(g-means[i].g) + abs(b-means[i].b));
                 if (dist < minDist) {
                 	  minDist = dist;
                 	  minCluster = i;
@@ -131,10 +131,12 @@ int main( int argc, char* argv[] )
             totr = totb = totg = 0;
             sizeCluster = 0;
 
-	  for ( col = 0 ; col < width ; ++col ) {
-		for ( row = 0 ; row < height ; ++row)  {
+		    for ( row = 0 ; row < height ; ++row)  {
+	 			for ( col = 0 ; col < width ; ++col ) {
 
                     if (*(cluster+row*width + col) == i) {
+						
+						 /* Get pixel's RGB values */
 		                  BMP_GetPixelRGB( bmp, col, row, &r, &g, &b );
 	       	             totr += r; 
 	       	             totg += g;
@@ -167,8 +169,8 @@ int main( int argc, char* argv[] )
     /* 5. Replace the pixel of the original image with the mean of the corresponding cluster */
 
 
-	  for ( col = 0 ; col < width ; ++col ) {
 		for ( row = 0 ; row < height ; ++row)  {
+	  for ( col = 0 ; col < width ; ++col ) {
             
             i = *(cluster+row*width + col);
             r = means[i].r;
@@ -196,5 +198,3 @@ int main( int argc, char* argv[] )
 
 	return 0;
 }
-
- 
