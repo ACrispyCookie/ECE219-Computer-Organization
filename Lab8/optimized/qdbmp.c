@@ -99,6 +99,8 @@ BMP* BMP_Create( UINT width, UINT height, USHORT depth )
 	bmp->Header.Width				= width;
 	bmp->Header.Height				= height;
 	bmp->Header.BitsPerPixel		= depth;
+	bmp->Header.BitsPerPixel		= bytes_per_pixel;
+	bmp->Header.BytesPerRow	    	= bytes_per_row;
 	bmp->Header.ImageDataSize		= bytes_per_row * height;
 	bmp->Header.FileSize			= bmp->Header.ImageDataSize + 54 + ( depth == 8 ? BMP_PALETTE_SIZE : 0 );
 	bmp->Header.DataOffset			= 54 + ( depth == 8 ? BMP_PALETTE_SIZE : 0 );
@@ -206,6 +208,11 @@ BMP* BMP_ReadFile( const char* filename )
 		free( bmp );
 		return NULL;
 	}
+	/* Add extra commonly used fields to the header*/
+	bmp->Header.BytesPerPixel = bmp->Header.BitsPerPixel >> 3;
+	UINT bytes_per_row = bmp->Header.Width * bmp->Header.BytesPerPixel;
+	bytes_per_row += ( bytes_per_row % 4 ? 4 - bytes_per_row % 4 : 0 );
+	bmp->Header.BytesPerRow = bytes_per_row;
 
 
 	/* Verify that the bitmap variant is supported */
@@ -405,10 +412,10 @@ void BMP_GetPixelRGB( BMP* bmp, UINT x, UINT y, UCHAR* r, UCHAR* g, UCHAR* b )
 	{
 		BMP_LAST_ERROR_CODE = BMP_OK;
 
-		bytes_per_pixel = bmp->Header.BitsPerPixel >> 3;
+		bytes_per_pixel = bmp->Header.BytesPerPixel;
 
 		/* Row's size is rounded up to the next multiple of 4 bytes */
-		bytes_per_row = bmp->Header.ImageDataSize / bmp->Header.Height;
+		bytes_per_row = bmp->Header.BytesPerRow;
 
 		/* Calculate the location of the relevant pixel (rows are flipped) */
 		pixel = bmp->Data + ( ( bmp->Header.Height - y - 1 ) * bytes_per_row + x * bytes_per_pixel );
@@ -451,10 +458,10 @@ void BMP_SetPixelRGB( BMP* bmp, UINT x, UINT y, UCHAR r, UCHAR g, UCHAR b )
 	{
 		BMP_LAST_ERROR_CODE = BMP_OK;
 
-		bytes_per_pixel = bmp->Header.BitsPerPixel >> 3;
+		bytes_per_pixel = bmp->Header.BytesPerPixel;
 
 		/* Row's size is rounded up to the next multiple of 4 bytes */
-		bytes_per_row = bmp->Header.ImageDataSize / bmp->Header.Height;
+		bytes_per_row = bmp->Header.BytesPerRow;
 
 		/* Calculate the location of the relevant pixel (rows are flipped) */
 		pixel = bmp->Data + ( ( bmp->Header.Height - y - 1 ) * bytes_per_row + x * bytes_per_pixel );
@@ -490,7 +497,7 @@ void BMP_GetPixelIndex( BMP* bmp, UINT x, UINT y, UCHAR* val )
 		BMP_LAST_ERROR_CODE = BMP_OK;
 
 		/* Row's size is rounded up to the next multiple of 4 bytes */
-		bytes_per_row = bmp->Header.ImageDataSize / bmp->Header.Height;
+		bytes_per_row = bmp->Header.BytesPerRow;
 
 		/* Calculate the location of the relevant pixel */
 		pixel = bmp->Data + ( ( bmp->Header.Height - y - 1 ) * bytes_per_row + x );
@@ -524,7 +531,7 @@ void BMP_SetPixelIndex( BMP* bmp, UINT x, UINT y, UCHAR val )
 		BMP_LAST_ERROR_CODE = BMP_OK;
 
 		/* Row's size is rounded up to the next multiple of 4 bytes */
-		bytes_per_row = bmp->Header.ImageDataSize / bmp->Header.Height;
+		bytes_per_row = bmp->Header.BytesPerRow;
 
 		/* Calculate the location of the relevant pixel */
 		pixel = bmp->Data + ( ( bmp->Header.Height - y - 1 ) * bytes_per_row + x );

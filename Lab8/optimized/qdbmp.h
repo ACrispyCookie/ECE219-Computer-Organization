@@ -93,6 +93,8 @@ typedef struct _BMP_Header
 	UINT		Height;				/* Bitmap's height */
 	USHORT		Planes;				/* Number of color planes in the bitmap */
 	USHORT		BitsPerPixel;		/* Number of bits per pixel */
+	USHORT		BytesPerPixel;		/* Number of bytes per pixel */
+	USHORT		BytesPerRow;		/* Number of bytes per row */
 	UINT		CompressionType;	/* Compression type */
 	UINT		ImageDataSize;		/* Size of uncompressed image's data */
 	UINT		HPixelsPerMeter;	/* Horizontal resolution (pixels per meter) */
