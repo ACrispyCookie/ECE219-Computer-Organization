@@ -24,7 +24,10 @@ int main(int argc, char * argv[]) {
     UINT noClusters; /* Number of of clusters. It is given by the user */
     UINT dist, minDist, minCluster, iter, maxIterations;
     UINT noOfMoves; /* Total number of inter-cluster moves between two succesive iterations */
-    UINT totr, totb, totg, sizeCluster;
+    UINT * totrArr;
+    UINT * totbArr;
+    UINT * totgArr;
+    UINT * sizeClusterArr;
 
     /* Check arguments */
     if (argc != 4) {
@@ -42,6 +45,10 @@ int main(int argc, char * argv[]) {
 
     noClusters = (UINT) atoi(argv[3]);
     means = (MEANS * ) calloc(noClusters, sizeof(MEANS));
+    totrArr = (UINT * ) calloc(noClusters, sizeof(UINT));
+    totbArr = (UINT * ) calloc(noClusters, sizeof(UINT));
+    totgArr = (UINT * ) calloc(noClusters, sizeof(UINT));
+    sizeClusterArr = (UINT * ) calloc(noClusters, sizeof(UINT));
 
     /* 1. Initialize cluster means with (R, G, B) values from random coordinates of the Input Image*/
     srand(time(NULL));
@@ -75,7 +82,12 @@ int main(int argc, char * argv[]) {
         ++iter;
         printf("ITER %ld\n", iter);
 
-        totr = totb = totg = 0;
+        for (i = 0; i < noClusters; ++i) {
+            totrArr[i] = 0;
+            totbArr[i] = 0;
+            totgArr[i] = 0;
+            sizeClusterArr[i] = 0;
+        }
         /* 2. Go through each pixel in the input image and calculate its nearest mean. 
               The output of phase 2 is the cluster* data structure.                    */
 
@@ -100,6 +112,10 @@ int main(int argc, char * argv[]) {
                     *(cluster + row * width + col) = minCluster;
                     ++noOfMoves;
                 }
+                totrArr[minCluster] += r;
+                totgArr[minCluster] += g;
+                totbArr[minCluster] += b;
+                sizeClusterArr[minCluster]++;
 
             } /* for */
         } /* for */
@@ -107,31 +123,9 @@ int main(int argc, char * argv[]) {
         /* 3. Update the mean of each cluster based on the pixels assigned to them. */
         if (noOfMoves > 0) {
             for (i = 0; i < noClusters; ++i) {
-
-                totr = totb = totg = 0;
-                sizeCluster = 0;
-
-                for (row = 0; row < height; ++row) {
-                    for (col = 0; col < width; ++col) {
-
-                        if ( * (cluster + row * width + col) == i) {
-
-                            /* Get pixel's RGB values */
-                            BMP_GetPixelRGB(bmp, col, row, & r, & g, & b);
-                            totr += r;
-                            totg += g;
-                            totb += b;
-                            sizeCluster++;
-
-                        }
-
-                    }
-                }
-
-                means[i].r = (UCHAR)(totr / sizeCluster);
-                means[i].g = (UCHAR)(totg / sizeCluster);
-                means[i].b = (UCHAR)(totb / sizeCluster);
-
+                means[i].r = (UCHAR)(totrArr[i] / sizeClusterArr[i]);
+                means[i].g = (UCHAR)(totgArr[i] / sizeClusterArr[i]);
+                means[i].b = (UCHAR)(totbArr[i] / sizeClusterArr[i]);
             }
 
         }
