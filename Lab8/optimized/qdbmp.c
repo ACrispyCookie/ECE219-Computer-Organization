@@ -210,9 +210,7 @@ BMP* BMP_ReadFile( const char* filename )
 	}
 	/* Add extra commonly used fields to the header*/
 	bmp->Header.BytesPerPixel = bmp->Header.BitsPerPixel >> 3;
-	UINT bytes_per_row = bmp->Header.Width * bmp->Header.BytesPerPixel;
-	bytes_per_row += ( bytes_per_row % 4 ? 4 - bytes_per_row % 4 : 0 );
-	bmp->Header.BytesPerRow = bytes_per_row;
+	bmp->Header.BytesPerRow = bmp->Header.ImageDataSize / bmp->Header.Height;
 
 
 	/* Verify that the bitmap variant is supported */
