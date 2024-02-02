@@ -20,6 +20,7 @@ int main(int argc, char * argv[]) {
     UINT width, height, row, col;
     UINT i;
     MEANS * means; /* Holds the (R, G, B) means of each cluster  */
+    MEANS mean; /* A single (R, G, B) mean */
     UINT noClusters; /* Number of of clusters. It is given by the user */
     UINT dist, minDist, minCluster, iter, maxIterations;
     UINT noOfMoves; /* Total number of inter-cluster moves between two succesive iterations */
@@ -148,13 +149,11 @@ int main(int argc, char * argv[]) {
         for (col = 0; col < width; ++col) {
 
             i = * (cluster + row * width + col);
-            r = means[i].r;
-            g = means[i].g;
-            b = means[i].b;
+            mean = means[i];
 
             /* Note: colors are stored in BGR order */
 
-            BMP_SetPixelRGB(bmp, col, row, r, g, b);
+            BMP_SetPixelRGB(bmp, col, row, mean.r, mean.g, mean.b);
 
         }
 
