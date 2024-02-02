@@ -128,6 +128,15 @@ typedef struct _MEANS
 	UCHAR		b;
 } MEANS;
 
+/* Information for the clusters */
+typedef struct _CLUSTERSTATS   
+{
+	UINT	    totr;
+	UINT		totg;
+	UINT		totb;
+	UINT        size;
+} CLUSTER_STATS;
+
 
 
 

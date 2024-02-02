@@ -24,10 +24,7 @@ int main(int argc, char * argv[]) {
     UINT noClusters; /* Number of of clusters. It is given by the user */
     UINT dist, minDist, minCluster, iter, maxIterations;
     UINT noOfMoves; /* Total number of inter-cluster moves between two succesive iterations */
-    UINT * totrArr;
-    UINT * totbArr;
-    UINT * totgArr;
-    UINT * sizeClusterArr;
+    CLUSTER_STATS * clusterStats; /* Holds the statistics of each cluster */
 
     /* Check arguments */
     if (argc != 4) {
@@ -45,10 +42,7 @@ int main(int argc, char * argv[]) {
 
     noClusters = (UINT) atoi(argv[3]);
     means = (MEANS * ) calloc(noClusters, sizeof(MEANS));
-    totrArr = (UINT * ) calloc(noClusters, sizeof(UINT));
-    totbArr = (UINT * ) calloc(noClusters, sizeof(UINT));
-    totgArr = (UINT * ) calloc(noClusters, sizeof(UINT));
-    sizeClusterArr = (UINT * ) calloc(noClusters, sizeof(UINT));
+    clusterStats = (CLUSTER_STATS * ) calloc(noClusters, sizeof(CLUSTER_STATS));
 
     /* 1. Initialize cluster means with (R, G, B) values from random coordinates of the Input Image*/
     srand(time(NULL));
@@ -83,10 +77,10 @@ int main(int argc, char * argv[]) {
         printf("ITER %ld\n", iter);
 
         for (i = 0; i < noClusters; ++i) {
-            totrArr[i] = 0;
-            totbArr[i] = 0;
-            totgArr[i] = 0;
-            sizeClusterArr[i] = 0;
+            clusterStats[i].totr = 0;
+            clusterStats[i].totb = 0;
+            clusterStats[i].totg = 0;
+            clusterStats[i].size = 0;
         }
         /* 2. Go through each pixel in the input image and calculate its nearest mean. 
               The output of phase 2 is the cluster* data structure.                    */
@@ -108,14 +102,14 @@ int main(int argc, char * argv[]) {
                     }
                 }
 
-                if ( * (cluster + row * width + col) != minCluster) {
+                if ( *(cluster + row * width + col) != minCluster) {
                     *(cluster + row * width + col) = minCluster;
                     ++noOfMoves;
                 }
-                totrArr[minCluster] += r;
-                totgArr[minCluster] += g;
-                totbArr[minCluster] += b;
-                sizeClusterArr[minCluster]++;
+                clusterStats[minCluster].totr += r;
+                clusterStats[minCluster].totg += g;
+                clusterStats[minCluster].totb += b;
+                clusterStats[minCluster].size++;
 
             } /* for */
         } /* for */
@@ -123,9 +117,9 @@ int main(int argc, char * argv[]) {
         /* 3. Update the mean of each cluster based on the pixels assigned to them. */
         if (noOfMoves > 0) {
             for (i = 0; i < noClusters; ++i) {
-                means[i].r = (UCHAR)(totrArr[i] / sizeClusterArr[i]);
-                means[i].g = (UCHAR)(totgArr[i] / sizeClusterArr[i]);
-                means[i].b = (UCHAR)(totbArr[i] / sizeClusterArr[i]);
+                means[i].r = (UCHAR)(clusterStats[i].totr / clusterStats[i].size);
+                means[i].g = (UCHAR)(clusterStats[i].totg / clusterStats[i].size);
+                means[i].b = (UCHAR)(clusterStats[i].totb / clusterStats[i].size);
             }
 
         }
@@ -142,7 +136,7 @@ int main(int argc, char * argv[]) {
     for (row = 0; row < height; ++row) {
         for (col = 0; col < width; ++col) {
 
-            i = * (cluster + row * width + col);
+            i = *(cluster + row * width + col);
             mean = means[i];
 
             /* Note: colors are stored in BGR order */
@@ -150,7 +144,6 @@ int main(int argc, char * argv[]) {
             BMP_SetPixelRGB(bmp, col, row, mean.r, mean.g, mean.b);
 
         }
-
     }
 
     /* Write out the output image and finish */
@@ -159,6 +152,9 @@ int main(int argc, char * argv[]) {
 
     /* Free all memory allocated for the image */
     BMP_Free(bmp);
+    free(cluster);
+    free(means);
+    free(clusterStats);
 
     return 0;
 }
