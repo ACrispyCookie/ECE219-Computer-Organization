@@ -1,0 +1,26 @@
+ITER 1
+ITER 2
+ITER 3
+ITER 4
+ITER 5
+ITER 6
+ITER 7
+ITER 8
+ITER 9
+ITER 10
+means[0] = (91, 135, 116)
+means[1] = (155, 205, 183)
+means[2] = (47, 31, 29)
+means[3] = (77, 74, 68)
+
+ Performance counter stats for './kmeans ./Input_Data/andromeda_tiled_rgb.bmp ./Output_Data/andromeda_tiled_rgb.bmp 4':
+
+   114,090,572,069      L1-dcache-loads:u                                                     
+    29,957,278,398      L1-dcache-load-misses:u          #   26.26% of all L1-dcache accesses 
+    24,643,109,419      LLC-loads:u                                                           
+    18,805,945,640      LLC-load-misses:u                #   76.31% of all L1-icache accesses 
+
+    1732.379524107 seconds time elapsed
+
+    1523.767596000 seconds user
+      27.061001000 seconds sys

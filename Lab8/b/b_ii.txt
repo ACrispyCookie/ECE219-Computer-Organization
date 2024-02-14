@@ -1,0 +1,26 @@
+ITER 1
+ITER 2
+ITER 3
+ITER 4
+ITER 5
+ITER 6
+ITER 7
+ITER 8
+ITER 9
+ITER 10
+means[0] = (106, 207, 101)
+means[1] = (146, 75, 52)
+means[2] = (196, 122, 188)
+means[3] = (56, 85, 174)
+
+ Performance counter stats for './kmeans ./Input_Data/hf_rgb_p2p1.bmp ./Output_Data/hf_rgb_p2p1.bmp 4':
+
+    83,561,806,763      L1-dcache-loads:u                                                     
+    18,937,331,750      L1-dcache-load-misses:u          #   22.66% of all L1-dcache accesses 
+    16,576,920,652      LLC-loads:u                                                           
+     3,102,235,157      LLC-load-misses:u                #   18.71% of all L1-icache accesses 
+
+     373.515465152 seconds time elapsed
+
+     369.212193000 seconds user
+       1.514268000 seconds sys

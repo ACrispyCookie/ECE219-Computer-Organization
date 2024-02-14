@@ -1,0 +1,57 @@
+lfh.bmp:
+
+ITER 1
+ITER 2
+ITER 3
+ITER 4
+ITER 5
+ITER 6
+ITER 7
+ITER 8
+ITER 9
+ITER 10
+means[0] = (35, 35, 35)
+means[1] = (168, 168, 168)
+means[2] = (105, 105, 105)
+means[3] = (226, 226, 226)
+
+ Performance counter stats for './kmeans ./Input_Data/lfh.bmp ./Output_Data/lfh.bmp 4':
+
+   114,293,928,621      L1-dcache-loads:u                                                     
+    26,488,019,755      L1-dcache-load-misses:u          #   23.18% of all L1-dcache accesses 
+    22,867,302,211      LLC-loads:u                                                           
+    14,164,453,315      LLC-load-misses:u                #   61.94% of all L1-icache accesses 
+
+     938.218760970 seconds time elapsed
+
+     884.113355000 seconds user
+      11.464005000 seconds sys
+
+lfv.bmp:
+
+ITER 1
+ITER 2
+ITER 3
+ITER 4
+ITER 5
+ITER 6
+ITER 7
+ITER 8
+ITER 9
+ITER 10
+means[0] = (64, 64, 64)
+means[1] = (209, 209, 209)
+means[2] = (18, 18, 18)
+means[3] = (127, 127, 127)
+
+ Performance counter stats for './kmeans ./Input_Data/lfv.bmp ./Output_Data/lfv.bmp 4':
+
+   114,630,772,810      L1-dcache-loads:u                                                     
+    26,667,975,373      L1-dcache-load-misses:u          #   23.26% of all L1-dcache accesses 
+    22,962,556,826      LLC-loads:u                                                           
+    14,098,643,678      LLC-load-misses:u                #   61.40% of all L1-icache accesses 
+
+     806.095185058 seconds time elapsed
+
+     783.123338000 seconds user
+       4.674587000 seconds sys
