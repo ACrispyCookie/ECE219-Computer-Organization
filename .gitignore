@@ -1,0 +1,33 @@
+# Compiled binaries and object files
+*.out
+*.o
+*.exe
+*.class
+
+# Verilog / simulation outputs
+out/
+*.vcd
+*.vvp
+verilog.out
+lab*a.out
+tb_dumpfile.vcd
+cpu_tb.vcd
+dumpfile.vcd
+
+# C build outputs
+kmeans
+loop1
+loop2
+loop1_O3
+loop2_O3
+
+# Submission archives and temporary files
+*.zip
+*.tmp
+
+# Editor/OS noise
+*.swp
+*~
+.DS_Store
+.vscode/
+.idea/

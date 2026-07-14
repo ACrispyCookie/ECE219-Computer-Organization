@@ -38,6 +38,7 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
   input [31:0] wd;
   output reg [31:0] rdA, rdB;
   output reg [31:0] data[31:0];
+  integer i;
 
   always @(negedge clock, reset) begin
     if (reset) begin
@@ -46,6 +47,7 @@ module RegFile (clock, reset, raA, raB, wa, wen, wd, rdA, rdB);
     else begin
       for (i = 0; i < 32; i = i + 1)
         data[i] = i;
+    end
   end
 
   always @(data[raA], data[raB], raA, raB) begin
