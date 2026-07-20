@@ -19,6 +19,8 @@ Coursework repository for **ECE219 — Computer Organization** at the **Universi
 
 ## Course contents
 
+Recovered lab handouts for Labs 1–9 are collected under [`docs/handouts/`](docs/handouts/).
+
 | Path | Description |
 | --- | --- |
 | [`Lab1/`](Lab1/) | Introductory MIPS assembly exercises. |
