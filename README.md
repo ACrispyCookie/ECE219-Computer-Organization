@@ -19,7 +19,7 @@ Coursework repository for **ECE219 — Computer Organization** at the **Universi
 
 ## Course contents
 
-Recovered lab handouts for Labs 1–9 are collected under [`docs/handouts/`](docs/handouts/).
+Lab handouts for Labs 1–9 are under [`docs/handouts/`](docs/handouts/).
 
 | Path | Description |
 | --- | --- |
