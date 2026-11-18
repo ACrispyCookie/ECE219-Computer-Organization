@@ -1,10 +1,8 @@
 # ECE219 — Computer Organization
 
-![MIPS](https://img.shields.io/badge/MIPS-assembly-blue)
-![Verilog](https://img.shields.io/badge/Verilog-RTL-purple)
-![C](https://img.shields.io/badge/C-performance-green)
-![CPU](https://img.shields.io/badge/CPU-datapath-orange)
-![Coursework](https://img.shields.io/badge/UTH-ECE219-teal)
+![MIPS assembly](https://img.shields.io/badge/MIPS%20assembly-0E7C86?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDZsLTYgNiA2IDZNMTYgNmw2IDYtNiA2IiBzdHJva2Utd2lkdGg9IjIuNCIvPjwvc3ZnPg==)
+![Verilog](https://img.shields.io/badge/Verilog-0E7C86?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik04IDZsLTYgNiA2IDZNMTYgNmw2IDYtNiA2IiBzdHJva2Utd2lkdGg9IjIuNCIvPjwvc3ZnPg==)
+![C](https://img.shields.io/badge/C-0E7C86?style=flat&logo=c&logoColor=white)
 
 Coursework repository for **ECE219 — Computer Organization** at the **University of Thessaly**. The labs cover MIPS assembly, C/assembly comparisons, Verilog datapath and control logic, and cache/performance experiments in C.
 
